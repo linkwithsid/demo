@@ -35,7 +35,7 @@ public class TestDaoImpl implements TestDao {
                 System.out.println(e.getStackTrace());
             }
             finally {
-                if(null == session) {
+                if(null != session) {
                     session.close();
                 }
             }
