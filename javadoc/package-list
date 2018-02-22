@@ -1,0 +1,6 @@
+com.glaucus.test.demo
+com.glaucus.test.demo.controller
+com.glaucus.test.demo.dao
+com.glaucus.test.demo.entity
+com.glaucus.test.demo.service
+com.glaucus.test.demo.util
