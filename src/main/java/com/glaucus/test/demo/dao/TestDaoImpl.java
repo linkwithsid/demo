@@ -6,8 +6,13 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Repository
 public class TestDaoImpl implements TestDao {
+
+
+    private AtomicInteger value = new AtomicInteger();
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -15,29 +20,26 @@ public class TestDaoImpl implements TestDao {
     @Override
     public Integer getIncrementedValue() {
         Session session = null;
-        TestEntity testEntity = null;
-        synchronized (this) {
-            try {
-                session = sessionFactory.openSession();
-                session.beginTransaction();
-                testEntity = session.get(TestEntity.class, "0"); //get 0th element from DB
-                if (null == testEntity) {                              // if 0th element not available add element to DB
-                    testEntity = new TestEntity();
-                    testEntity.setId("0");
-                    testEntity.setValue(1);
-                    session.save(testEntity);
-                } else {                                            // update the DB with increment value
-                    testEntity.setValue(testEntity.getValue() + 1);
-                    session.update(testEntity);
-                }
-                session.getTransaction().commit();
-            } catch (Exception e) {
-                System.out.println(e.getStackTrace());
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId("0");
+        try {
+            session = sessionFactory.openSession();
+            session.beginTransaction();
+            if(0 == value.get()){
+                testEntity.setValue(value.incrementAndGet());
+                session.saveOrUpdate(testEntity);
             }
-            finally {
-                if(null != session) {
-                    session.close();
+            else {
+                    testEntity.setValue(value.incrementAndGet());
+                    session.update(testEntity);    // update the DB with increment value
                 }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
+        }
+        finally {
+            if(null != session) {
+                session.close();
             }
         }
         return testEntity.getValue();
